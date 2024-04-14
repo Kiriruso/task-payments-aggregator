@@ -23,8 +23,7 @@ async def handle_message(message: Message):
         payments = await crud.get_payments(request)
         dataset = make_dataset(payments)
         await message.answer(text=dataset.model_dump_json())
-    except ValidationError as e:
-        print(e.errors()[0])
+    except (ValidationError, json.decoder.JSONDecodeError) as e:
         await message.answer(
             'Допустимо отправлять только следующие запросы:'
             '{"dt_from": "2022-09-01T00:00:00", "dt_upto": "2022-12-31T23:59:00", "group_type": "month"}'
