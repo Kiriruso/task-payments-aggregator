@@ -4,7 +4,9 @@ from aiogram import Router
 from aiogram.types import Message
 from pydantic import ValidationError
 
+from bot import crud
 from bot.schemas import RequestSchema
+from bot.utils import make_dataset
 
 router = Router(name=__name__)
 
@@ -15,10 +17,12 @@ async def handle_message(message: Message):
         await message.answer("Некорректный формат сообщения!")
         return
 
-    data = json.loads(message.text)
-
     try:
+        data = json.loads(message.text)
         request = RequestSchema(**data)
+        payments = await crud.get_payments(request)
+        dataset = make_dataset(payments)
+        await message.answer(text=dataset.model_dump_json())
     except ValidationError as e:
         print(e.errors()[0])
         await message.answer(
